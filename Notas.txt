@@ -1,0 +1,29 @@
+1 Aprendizaje automático aplicado al fútbol profesional: mejora del rendimiento y predicción de resultados:
+https://www.mdpi.com/2504-4990/7/3/85
+
+2 Aprendizaje automático diverso para predecir la probabilidad de gol en las ligas de fútbol de élite:
+https://www.mdpi.com/2504-4990/6/3/86
+
+3 Bayes-xG: Corrección de jugadores y posiciones en goles esperados (xG) mediante el enfoque jerárquico bayesiano
+https://arxiv.org/abs/2311.13707
+
+4 Modelos explicables de objetivos esperados para el análisis del rendimiento en el análisis del fútbol
+https://arxiv.org/abs/2206.07212
+
+5 Un enfoque de aprendizaje automático para la predicción de goles ajustados por jugador y posición en fútbol.
+https://arxiv.org/abs/2301.13052
+
+6 Un marco de análisis predictivo para pronosticar resultados de partidos de fútbol utilizando modelos de aprendizaje automático
+https://www.sciencedirect.com/science/article/pii/S2772662224001413?via%3Dihub
+
+7 Predicción de rendimiento académico de alumnos usando machine learning
+https://repositorio.ulima.edu.pe/handle/20.500.12724/16703
+
+8 PREDICCIÓN DEL TALENTO DEPORTIVO EN JÓVENES LANZADORES UTILIZANDO MACHINE LEARNING:
+http://cdeporte.rediris.es/revista/inpress/artprediccion1562.pdf
+
+9 Predicción del rendimiento de deportistas mediante técnicas de Machine Learning (TFG)
+https://docta.ucm.es/entities/publication/4fe7deb6-9ad7-4b7c-a2f1-9b49b433d1be
+
+10 Predicción y rendimiento: innovación en el scouting del fútbol con machine learning
+https://repositori.upf.edu/items/b97ffb56-c172-4627-a552-54bd982699cc#page=1
