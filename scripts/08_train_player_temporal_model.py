@@ -33,6 +33,12 @@ FEATURE_IMPORTANCE_OUTPUT_PATH = (
 REPORT_OUTPUT_PATH = REPORTS_DIR / "08_player_temporal_model_report.md"
 
 
+FEATURE_SETS_TO_RUN = [
+    "full",
+    "without_previous_xg",
+]
+
+
 def build_temporal_report(
     evaluation_df: pd.DataFrame,
     feature_importance_df: pd.DataFrame,
@@ -45,15 +51,25 @@ def build_temporal_report(
 
     lines.append("# Modelo temporal de rendimiento de jugadores")
     lines.append("")
+
     lines.append("## Métricas de evaluación")
     lines.append("")
     lines.append(evaluation_df.to_markdown(index=False))
     lines.append("")
 
-    lines.append("## Variables más importantes")
+    lines.append("## Variables más importantes por experimento")
     lines.append("")
-    lines.append(feature_importance_df.head(top_n).to_markdown(index=False))
-    lines.append("")
+
+    for feature_set in evaluation_df["feature_set"].unique():
+        lines.append(f"### Experimento: {feature_set}")
+        lines.append("")
+
+        subset_importance = feature_importance_df[
+            feature_importance_df["feature_set"] == feature_set
+        ]
+
+        lines.append(subset_importance.head(top_n).to_markdown(index=False))
+        lines.append("")
 
     lines.append("## Interpretación metodológica")
     lines.append("")
@@ -62,6 +78,13 @@ def build_temporal_report(
         "con temporadas anteriores y se evalúa sobre el último par de temporadas "
         "disponible. Por tanto, la evaluación se aproxima más a un escenario real "
         "de predicción futura que una división aleatoria."
+    )
+    lines.append("")
+    lines.append(
+        "Se comparan dos configuraciones. La primera utiliza todas las variables "
+        "históricas disponibles. La segunda elimina xG_90 y npxG_90 de la "
+        "temporada anterior para comprobar si el modelo mantiene capacidad "
+        "predictiva sin utilizar directamente métricas de goles esperados previos."
     )
     lines.append("")
     lines.append(
@@ -77,13 +100,30 @@ def main() -> None:
 
     temporal_df = pd.read_csv(TEMPORAL_DATASET_PATH)
 
-    results, random_forest_model = train_and_evaluate_temporal_models(
-        temporal_df
-    )
+    all_results = []
+    all_feature_importances = []
+
+    for feature_set_name in FEATURE_SETS_TO_RUN:
+        print(f"Ejecutando experimento: {feature_set_name}")
+
+        results, random_forest_model = train_and_evaluate_temporal_models(
+            temporal_df,
+            feature_set_name=feature_set_name,
+        )
+
+        all_results.extend(results)
+
+        feature_importance_df = extract_temporal_feature_importance(
+            trained_model=random_forest_model,
+            feature_set_name=feature_set_name,
+        )
+
+        all_feature_importances.append(feature_importance_df)
 
     evaluation_df = pd.DataFrame(
         [
             {
+                "feature_set": result.feature_set,
                 "model": result.model_name,
                 "mae": result.mae,
                 "r2": result.r2,
@@ -92,12 +132,13 @@ def main() -> None:
                 "test_season": result.test_season,
                 "test_next_season": result.test_next_season,
             }
-            for result in results
+            for result in all_results
         ]
     )
 
-    feature_importance_df = extract_temporal_feature_importance(
-        random_forest_model
+    feature_importance_df = pd.concat(
+        all_feature_importances,
+        ignore_index=True,
     )
 
     evaluation_df.to_csv(EVALUATION_OUTPUT_PATH, index=False)
@@ -111,13 +152,23 @@ def main() -> None:
 
     REPORT_OUTPUT_PATH.write_text(report, encoding="utf-8")
 
+    print("")
     print("Entrenamiento temporal completado.")
     print("")
     print("Métricas:")
     print(evaluation_df)
     print("")
-    print("Top 15 variables más importantes:")
-    print(feature_importance_df.head(15))
+    print("Top 15 variables más importantes por experimento:")
+
+    for feature_set_name in FEATURE_SETS_TO_RUN:
+        print("")
+        print(f"Experimento: {feature_set_name}")
+        print(
+            feature_importance_df[
+                feature_importance_df["feature_set"] == feature_set_name
+            ].head(15)
+        )
+
     print("")
     print(f"Evaluación guardada en: {EVALUATION_OUTPUT_PATH}")
     print(f"Importancia de variables guardada en: {FEATURE_IMPORTANCE_OUTPUT_PATH}")

@@ -170,6 +170,19 @@ def build_player_temporal_modeling_dataset(
         raise ValueError(f"La variable objetivo no existe: {target_column}")
 
     current_df = add_temporal_base_features(df)
+    
+    rows_before_position_filter = len(current_df)
+
+    current_df = current_df[
+        current_df["position_main"] != "GK"
+    ].copy()
+
+    rows_after_position_filter = len(current_df)
+    removed_goalkeepers = rows_before_position_filter - rows_after_position_filter
+
+    print(
+        f"Porteros eliminados del dataset temporal: {removed_goalkeepers}"
+    )
 
     future_columns = [
         "id",
