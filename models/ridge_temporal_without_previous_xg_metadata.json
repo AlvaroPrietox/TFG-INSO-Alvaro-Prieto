@@ -1,0 +1,43 @@
+{
+    "model_name": "Ridge",
+    "model_type": "linear_regularized_regression",
+    "feature_set": "without_previous_xg",
+    "target_column": "target_next_xG_90",
+    "numeric_features": [
+        "games",
+        "time",
+        "minutes_per_game",
+        "high_participation",
+        "goals_90",
+        "assists_90",
+        "xA_90",
+        "shots_90",
+        "key_passes_90",
+        "yellow_cards_90",
+        "red_cards_90",
+        "npg_90",
+        "xGChain_90",
+        "xGBuildup_90"
+    ],
+    "categorical_features": [
+        "position_main",
+        "league"
+    ],
+    "training_rows": 3957,
+    "seasons_used": [
+        "2020-2021",
+        "2021-2022",
+        "2022-2023",
+        "2023-2024"
+    ],
+    "next_seasons_used": [
+        "2021-2022",
+        "2022-2023",
+        "2023-2024",
+        "2024-2025"
+    ],
+    "sklearn_version": "1.8.0",
+    "model_file": "ridge_temporal_without_previous_xg.joblib",
+    "selection_reason": "Ridge se selecciona como modelo final porque obtuvo el mejor rendimiento en la comparación externa 2025-2026, con menor MAE y mayor R² que RandomForestRegressor en el conjunto global y en el subconjunto F/M.",
+    "notes": "Modelo temporal entrenado para predecir xG_90 de la temporada siguiente sin utilizar xG_90 ni npxG_90 de la temporada anterior como predictores directos."
+}

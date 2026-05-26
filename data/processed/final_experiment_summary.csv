@@ -1,0 +1,21 @@
+evaluation_scope,subset,model,feature_set,n_train,n_eval,mae,r2,mean_signed_error,period,rank_mae_in_scope
+external_2025_2026,alto_>=0.50,HistGradientBoostingRegressor,without_previous_xg,,13,0.1276230857477082,-0.5895465440642209,-0.1017013203213103,2024-2025 → 2025-2026,1
+external_2025_2026,alto_>=0.50,Ridge,without_previous_xg,,13,0.1339212582005362,-0.7533275575306373,-0.0823392574411773,2024-2025 → 2025-2026,2
+external_2025_2026,alto_>=0.50,GradientBoostingRegressor,without_previous_xg,,13,0.1347369985915525,-0.7801911270540174,-0.0993063635466138,2024-2025 → 2025-2026,3
+external_2025_2026,alto_>=0.50,RandomForestRegressor,without_previous_xg,,13,0.15097616559085,-0.9748901943352432,-0.1236150855730781,2024-2025 → 2025-2026,4
+external_2025_2026,alto_>=0.50,DummyRegressor,without_previous_xg,,13,0.4897451938502465,-16.486907174001967,-0.4897451938502465,2024-2025 → 2025-2026,5
+external_2025_2026,jugadores_emparejados_sin_porteros,Ridge,without_previous_xg,3957,205,0.0516115201505061,0.8403498150143174,,2024-2025 → 2025-2026,1
+external_2025_2026,jugadores_emparejados_sin_porteros,HistGradientBoostingRegressor,without_previous_xg,3957,205,0.0518740095863039,0.8117747239546137,,2024-2025 → 2025-2026,2
+external_2025_2026,jugadores_emparejados_sin_porteros,RandomForestRegressor,without_previous_xg,3957,205,0.0550368872587728,0.8023194863547602,,2024-2025 → 2025-2026,3
+external_2025_2026,jugadores_emparejados_sin_porteros,GradientBoostingRegressor,without_previous_xg,3957,205,0.0563439743119966,0.7857294079165897,,2024-2025 → 2025-2026,4
+external_2025_2026,jugadores_emparejados_sin_porteros,DummyRegressor,without_previous_xg,3957,205,0.1359306514357307,-0.000433703079379,,2024-2025 → 2025-2026,5
+external_2025_2026,solo_F_M,Ridge,without_previous_xg,3957,110,0.0674516922144427,0.8103132564557463,,2024-2025 → 2025-2026,1
+external_2025_2026,solo_F_M,HistGradientBoostingRegressor,without_previous_xg,3957,110,0.0689176519716471,0.7704773329569148,,2024-2025 → 2025-2026,2
+external_2025_2026,solo_F_M,RandomForestRegressor,without_previous_xg,3957,110,0.0738010596739819,0.7560514354095339,,2024-2025 → 2025-2026,3
+external_2025_2026,solo_F_M,GradientBoostingRegressor,without_previous_xg,3957,110,0.0752896364561847,0.7349874163881361,,2024-2025 → 2025-2026,4
+external_2025_2026,solo_F_M,DummyRegressor,without_previous_xg,3957,110,0.1630118008395329,-0.1912876629190727,,2024-2025 → 2025-2026,5
+temporal_internal,todos_sin_porteros,Ridge,without_previous_xg,3003,954,0.0586012011000031,0.7139790341199987,,2023-2024 → 2024-2025,1
+temporal_internal,todos_sin_porteros,GradientBoostingRegressor,without_previous_xg,3003,954,0.0594804364982612,0.70729267996312,,2023-2024 → 2024-2025,2
+temporal_internal,todos_sin_porteros,RandomForestRegressor,without_previous_xg,3003,954,0.0600737373480828,0.7030340583324917,,2023-2024 → 2024-2025,3
+temporal_internal,todos_sin_porteros,HistGradientBoostingRegressor,without_previous_xg,3003,954,0.0613754737083013,0.6866696551391825,,2023-2024 → 2024-2025,4
+temporal_internal,todos_sin_porteros,DummyRegressor,without_previous_xg,3003,954,0.1285693446702252,-0.003558197402369,,2023-2024 → 2024-2025,5
