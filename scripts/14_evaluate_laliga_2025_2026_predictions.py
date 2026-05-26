@@ -1,6 +1,4 @@
-import re
 import sys
-import unicodedata
 from pathlib import Path
 
 import joblib
@@ -15,6 +13,7 @@ sys.path.append(str(SRC_DIR))
 
 from football_predictor.player_temporal_features import simplify_position
 from football_predictor.player_temporal_modeling import get_temporal_feature_set
+from football_predictor.text_normalization import normalize_player_key
 
 
 PROCESSED_DATA_DIR = PROJECT_ROOT / "data" / "processed"
@@ -42,26 +41,6 @@ REPORT_OUTPUT_PATH = (
 FEATURE_SET_NAME = "without_previous_xg"
 INPUT_SEASON = "2024-2025"
 TARGET_SEASON = "2025-2026"
-
-
-def normalize_player_key(player_name: str) -> str:
-    """
-    Normaliza el nombre del jugador para facilitar la unión entre datasets.
-
-    Se eliminan tildes, signos de puntuación y diferencias de mayúsculas.
-    """
-    if pd.isna(player_name):
-        return ""
-
-    text = str(player_name).strip().lower()
-
-    text = unicodedata.normalize("NFKD", text)
-    text = "".join(character for character in text if not unicodedata.combining(character))
-
-    text = re.sub(r"[^a-z0-9 ]", " ", text)
-    text = re.sub(r"\s+", " ", text).strip()
-
-    return text
 
 
 def prepare_2024_2025_players_for_prediction(
