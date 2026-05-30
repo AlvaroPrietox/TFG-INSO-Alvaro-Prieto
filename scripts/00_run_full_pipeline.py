@@ -1,4 +1,5 @@
 import argparse
+import os
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -9,6 +10,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS_DIR = PROJECT_ROOT / "scripts"
 REPORTS_DIR = PROJECT_ROOT / "reports"
+FIGURES_DIR = REPORTS_DIR / "figures"
 DATA_DIR = PROJECT_ROOT / "data"
 RAW_DATA_DIR = DATA_DIR / "raw"
 PROCESSED_DATA_DIR = DATA_DIR / "processed"
@@ -16,6 +18,15 @@ MODELS_DIR = PROJECT_ROOT / "models"
 TESTS_DIR = PROJECT_ROOT / "tests"
 
 LOG_OUTPUT_PATH = REPORTS_DIR / "00_pipeline_execution_log.md"
+
+
+# Fuerza UTF-8 en la salida del proceso principal. Esto evita errores de
+# codificación en Windows cuando los scripts imprimen caracteres como "→".
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
+except AttributeError:
+    pass
 
 
 REQUIRED_INPUT_FILES = [
@@ -420,12 +431,19 @@ def run_command(command: list[str], description: str) -> subprocess.CompletedPro
         ]
     )
 
+    execution_env = os.environ.copy()
+    execution_env["PYTHONUTF8"] = "1"
+    execution_env["PYTHONIOENCODING"] = "utf-8"
+
     result = subprocess.run(
         command,
         cwd=PROJECT_ROOT,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         capture_output=True,
         check=False,
+        env=execution_env,
     )
 
     if result.stdout:
