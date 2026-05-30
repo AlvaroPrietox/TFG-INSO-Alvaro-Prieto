@@ -1,0 +1,159 @@
+{
+    "model_name": "Ridge",
+    "model_type": "linear_regularized_regression",
+    "approach": "one_independent_ridge_model_per_metric",
+    "metrics": [
+        {
+            "metric_key": "xG_90",
+            "metric_label": "Goles esperados",
+            "model_name": "Ridge",
+            "model_type": "linear_regularized_regression",
+            "target_column": "target_next_xG_90",
+            "numeric_features": [
+                "games",
+                "time",
+                "minutes_per_game",
+                "high_participation",
+                "goals_90",
+                "assists_90",
+                "xA_90",
+                "shots_90",
+                "key_passes_90",
+                "yellow_cards_90",
+                "red_cards_90",
+                "npg_90",
+                "xGChain_90",
+                "xGBuildup_90"
+            ],
+            "categorical_features": [
+                "position_main",
+                "league"
+            ],
+            "excluded_input_features": [
+                "xG_90",
+                "npxG_90"
+            ],
+            "training_rows": 3957,
+            "model_file": "ridge_temporal_xG_90.joblib",
+            "notes": "Modelo Ridge para estimar goles esperados por 90 minutos en la temporada siguiente. Se excluyen xG_90 y npxG_90 como predictores directos para evitar dependencia inmediata de la misma familia de métricas."
+        },
+        {
+            "metric_key": "goals_90",
+            "metric_label": "Goles",
+            "model_name": "Ridge",
+            "model_type": "linear_regularized_regression",
+            "target_column": "target_next_goals_90",
+            "numeric_features": [
+                "games",
+                "time",
+                "minutes_per_game",
+                "high_participation",
+                "xG_90",
+                "assists_90",
+                "xA_90",
+                "shots_90",
+                "key_passes_90",
+                "yellow_cards_90",
+                "red_cards_90",
+                "npxG_90",
+                "xGChain_90",
+                "xGBuildup_90"
+            ],
+            "categorical_features": [
+                "position_main",
+                "league"
+            ],
+            "excluded_input_features": [
+                "goals_90",
+                "npg_90"
+            ],
+            "training_rows": 3957,
+            "model_file": "ridge_temporal_goals_90.joblib",
+            "notes": "Modelo Ridge para estimar goles reales por 90 minutos en la temporada siguiente. Se excluyen goals_90 y npg_90 como señales directamente equivalentes de producción goleadora previa."
+        },
+        {
+            "metric_key": "assists_90",
+            "metric_label": "Asistencias",
+            "model_name": "Ridge",
+            "model_type": "linear_regularized_regression",
+            "target_column": "target_next_assists_90",
+            "numeric_features": [
+                "games",
+                "time",
+                "minutes_per_game",
+                "high_participation",
+                "goals_90",
+                "xG_90",
+                "xA_90",
+                "shots_90",
+                "key_passes_90",
+                "yellow_cards_90",
+                "red_cards_90",
+                "npg_90",
+                "npxG_90",
+                "xGChain_90",
+                "xGBuildup_90"
+            ],
+            "categorical_features": [
+                "position_main",
+                "league"
+            ],
+            "excluded_input_features": [
+                "assists_90"
+            ],
+            "training_rows": 3957,
+            "model_file": "ridge_temporal_assists_90.joblib",
+            "notes": "Modelo Ridge para estimar asistencias reales por 90 minutos en la temporada siguiente. Las asistencias son una métrica más ruidosa, ya que dependen también de la finalización de los compañeros."
+        },
+        {
+            "metric_key": "xA_90",
+            "metric_label": "Asistencias esperadas",
+            "model_name": "Ridge",
+            "model_type": "linear_regularized_regression",
+            "target_column": "target_next_xA_90",
+            "numeric_features": [
+                "games",
+                "time",
+                "minutes_per_game",
+                "high_participation",
+                "goals_90",
+                "xG_90",
+                "assists_90",
+                "shots_90",
+                "key_passes_90",
+                "yellow_cards_90",
+                "red_cards_90",
+                "npg_90",
+                "npxG_90",
+                "xGChain_90",
+                "xGBuildup_90"
+            ],
+            "categorical_features": [
+                "position_main",
+                "league"
+            ],
+            "excluded_input_features": [
+                "xA_90"
+            ],
+            "training_rows": 3957,
+            "model_file": "ridge_temporal_xA_90.joblib",
+            "notes": "Modelo Ridge para estimar asistencias esperadas por 90 minutos en la temporada siguiente. Se excluye xA_90 previo como predictor directo de la misma métrica objetivo."
+        }
+    ],
+    "training_rows_total": 3957,
+    "seasons_used": [
+        "2020-2021",
+        "2021-2022",
+        "2022-2023",
+        "2023-2024"
+    ],
+    "next_seasons_used": [
+        "2021-2022",
+        "2022-2023",
+        "2023-2024",
+        "2024-2025"
+    ],
+    "sklearn_version": "1.8.0",
+    "selection_reason": "Ridge se mantiene como modelo final porque obtuvo el mejor rendimiento externo para xG_90 en el conjunto global y F/M. La versión multi-métrica conserva el mismo algoritmo seleccionado y entrena un modelo independiente por cada métrica ofensiva.",
+    "notes": "Todos los objetivos se expresan por 90 minutos. Para cada métrica se excluye de las variables de entrada la versión previa directa de la métrica objetivo, con el fin de evitar una dependencia excesiva del mismo valor histórico."
+}

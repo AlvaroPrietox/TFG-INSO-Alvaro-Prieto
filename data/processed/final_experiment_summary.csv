@@ -1,21 +1,21 @@
-evaluation_scope,subset,model,feature_set,n_train,n_eval,mae,r2,mean_signed_error,period,rank_mae_in_scope
-external_2025_2026,alto_>=0.50,HistGradientBoostingRegressor,without_previous_xg,,13,0.1276230857477082,-0.5895465440642209,-0.1017013203213103,2024-2025 → 2025-2026,1
-external_2025_2026,alto_>=0.50,Ridge,without_previous_xg,,13,0.1339212582005362,-0.7533275575306373,-0.0823392574411773,2024-2025 → 2025-2026,2
-external_2025_2026,alto_>=0.50,GradientBoostingRegressor,without_previous_xg,,13,0.1347369985915525,-0.7801911270540174,-0.0993063635466138,2024-2025 → 2025-2026,3
-external_2025_2026,alto_>=0.50,RandomForestRegressor,without_previous_xg,,13,0.15097616559085,-0.9748901943352432,-0.1236150855730781,2024-2025 → 2025-2026,4
-external_2025_2026,alto_>=0.50,DummyRegressor,without_previous_xg,,13,0.4897451938502465,-16.486907174001967,-0.4897451938502465,2024-2025 → 2025-2026,5
-external_2025_2026,jugadores_emparejados_sin_porteros,Ridge,without_previous_xg,3957,205,0.0516115201505061,0.8403498150143174,,2024-2025 → 2025-2026,1
-external_2025_2026,jugadores_emparejados_sin_porteros,HistGradientBoostingRegressor,without_previous_xg,3957,205,0.0518740095863039,0.8117747239546137,,2024-2025 → 2025-2026,2
-external_2025_2026,jugadores_emparejados_sin_porteros,RandomForestRegressor,without_previous_xg,3957,205,0.0550368872587728,0.8023194863547602,,2024-2025 → 2025-2026,3
-external_2025_2026,jugadores_emparejados_sin_porteros,GradientBoostingRegressor,without_previous_xg,3957,205,0.0563439743119966,0.7857294079165897,,2024-2025 → 2025-2026,4
-external_2025_2026,jugadores_emparejados_sin_porteros,DummyRegressor,without_previous_xg,3957,205,0.1359306514357307,-0.000433703079379,,2024-2025 → 2025-2026,5
-external_2025_2026,solo_F_M,Ridge,without_previous_xg,3957,110,0.0674516922144427,0.8103132564557463,,2024-2025 → 2025-2026,1
-external_2025_2026,solo_F_M,HistGradientBoostingRegressor,without_previous_xg,3957,110,0.0689176519716471,0.7704773329569148,,2024-2025 → 2025-2026,2
-external_2025_2026,solo_F_M,RandomForestRegressor,without_previous_xg,3957,110,0.0738010596739819,0.7560514354095339,,2024-2025 → 2025-2026,3
-external_2025_2026,solo_F_M,GradientBoostingRegressor,without_previous_xg,3957,110,0.0752896364561847,0.7349874163881361,,2024-2025 → 2025-2026,4
-external_2025_2026,solo_F_M,DummyRegressor,without_previous_xg,3957,110,0.1630118008395329,-0.1912876629190727,,2024-2025 → 2025-2026,5
-temporal_internal,todos_sin_porteros,Ridge,without_previous_xg,3003,954,0.0586012011000031,0.7139790341199987,,2023-2024 → 2024-2025,1
-temporal_internal,todos_sin_porteros,GradientBoostingRegressor,without_previous_xg,3003,954,0.0594804364982612,0.70729267996312,,2023-2024 → 2024-2025,2
-temporal_internal,todos_sin_porteros,RandomForestRegressor,without_previous_xg,3003,954,0.0600737373480828,0.7030340583324917,,2023-2024 → 2024-2025,3
-temporal_internal,todos_sin_porteros,HistGradientBoostingRegressor,without_previous_xg,3003,954,0.0613754737083013,0.6866696551391825,,2023-2024 → 2024-2025,4
-temporal_internal,todos_sin_porteros,DummyRegressor,without_previous_xg,3003,954,0.1285693446702252,-0.003558197402369,,2023-2024 → 2024-2025,5
+summary_section,metric_key,metric_label,scope,model,feature_set,n_players,mae,r2,rank_by_mae,input_season,target_season,notes,mean_signed_error
+internal_temporal_xG_90,xG_90,Goles esperados,validación temporal interna,Ridge,without_previous_xg,954,0.0586,0.714,1,2023-2024,2024-2025,Comparación interna de modelos para xG_90.,
+internal_temporal_xG_90,xG_90,Goles esperados,validación temporal interna,GradientBoostingRegressor,without_previous_xg,954,0.0595,0.7073,2,2023-2024,2024-2025,Comparación interna de modelos para xG_90.,
+internal_temporal_xG_90,xG_90,Goles esperados,validación temporal interna,RandomForestRegressor,without_previous_xg,954,0.0601,0.703,3,2023-2024,2024-2025,Comparación interna de modelos para xG_90.,
+internal_temporal_xG_90,xG_90,Goles esperados,validación temporal interna,HistGradientBoostingRegressor,without_previous_xg,954,0.0614,0.6867,4,2023-2024,2024-2025,Comparación interna de modelos para xG_90.,
+internal_temporal_xG_90,xG_90,Goles esperados,validación temporal interna,DummyRegressor,without_previous_xg,954,0.1286,-0.0036,5,2023-2024,2024-2025,Comparación interna de modelos para xG_90.,
+external_global_xG_90,xG_90,Goles esperados,evaluación externa global,Ridge,without_previous_xg,205,0.0516,0.8403,1,2024-2025,2025-2026,Evaluación externa 2025-2026 para xG_90.,
+external_global_xG_90,xG_90,Goles esperados,evaluación externa global,HistGradientBoostingRegressor,without_previous_xg,205,0.0519,0.8118,2,2024-2025,2025-2026,Evaluación externa 2025-2026 para xG_90.,
+external_global_xG_90,xG_90,Goles esperados,evaluación externa global,RandomForestRegressor,without_previous_xg,205,0.055,0.8051,3,2024-2025,2025-2026,Evaluación externa 2025-2026 para xG_90.,
+external_global_xG_90,xG_90,Goles esperados,evaluación externa global,GradientBoostingRegressor,without_previous_xg,205,0.0563,0.7857,4,2024-2025,2025-2026,Evaluación externa 2025-2026 para xG_90.,
+external_global_xG_90,xG_90,Goles esperados,evaluación externa global,DummyRegressor,without_previous_xg,205,0.1359,-0.0004,5,2024-2025,2025-2026,Evaluación externa 2025-2026 para xG_90.,
+external_f_m_xG_90,xG_90,Goles esperados,evaluación externa F/M,Ridge,without_previous_xg,110,0.0675,0.8103,1,2024-2025,2025-2026,Evaluación externa 2025-2026 restringida a delanteros y centrocampistas.,
+external_f_m_xG_90,xG_90,Goles esperados,evaluación externa F/M,HistGradientBoostingRegressor,without_previous_xg,110,0.0689,0.7705,2,2024-2025,2025-2026,Evaluación externa 2025-2026 restringida a delanteros y centrocampistas.,
+external_f_m_xG_90,xG_90,Goles esperados,evaluación externa F/M,RandomForestRegressor,without_previous_xg,110,0.0737,0.7599,3,2024-2025,2025-2026,Evaluación externa 2025-2026 restringida a delanteros y centrocampistas.,
+external_f_m_xG_90,xG_90,Goles esperados,evaluación externa F/M,GradientBoostingRegressor,without_previous_xg,110,0.0753,0.735,4,2024-2025,2025-2026,Evaluación externa 2025-2026 restringida a delanteros y centrocampistas.,
+external_f_m_xG_90,xG_90,Goles esperados,evaluación externa F/M,DummyRegressor,without_previous_xg,110,0.163,-0.1913,5,2024-2025,2025-2026,Evaluación externa 2025-2026 restringida a delanteros y centrocampistas.,
+external_high_xG_90_range,xG_90,Goles esperados,jugadores con xG_90 real >= 0.50,HistGradientBoostingRegressor,without_previous_xg,13,0.1276,-0.5895,1,2024-2025,2025-2026,Análisis complementario en perfiles ofensivos de alto xG_90.,-0.1017
+external_high_xG_90_range,xG_90,Goles esperados,jugadores con xG_90 real >= 0.50,Ridge,without_previous_xg,13,0.1339,-0.7533,2,2024-2025,2025-2026,Análisis complementario en perfiles ofensivos de alto xG_90.,-0.0823
+external_high_xG_90_range,xG_90,Goles esperados,jugadores con xG_90 real >= 0.50,GradientBoostingRegressor,without_previous_xg,13,0.1347,-0.7802,3,2024-2025,2025-2026,Análisis complementario en perfiles ofensivos de alto xG_90.,-0.0993
+external_high_xG_90_range,xG_90,Goles esperados,jugadores con xG_90 real >= 0.50,RandomForestRegressor,without_previous_xg,13,0.1517,-0.9355,4,2024-2025,2025-2026,Análisis complementario en perfiles ofensivos de alto xG_90.,-0.1277
+external_high_xG_90_range,xG_90,Goles esperados,jugadores con xG_90 real >= 0.50,DummyRegressor,without_previous_xg,13,0.4897,-16.4869,5,2024-2025,2025-2026,Análisis complementario en perfiles ofensivos de alto xG_90.,-0.4897

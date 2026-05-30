@@ -1,0 +1,9 @@
+summary_section,metric_key,metric_label,scope,model,n_players,mae,r2,input_season,target_season
+external_multi_metric_f_m,assists_90,Asistencias,evaluación externa F/M,Ridge,110,0.0657,0.3936,2024-2025,2025-2026
+external_multi_metric_f_m,goals_90,Goles,evaluación externa F/M,Ridge,110,0.0883,0.687,2024-2025,2025-2026
+external_multi_metric_f_m,xA_90,Asistencias esperadas,evaluación externa F/M,Ridge,110,0.0449,0.6533,2024-2025,2025-2026
+external_multi_metric_f_m,xG_90,Goles esperados,evaluación externa F/M,Ridge,110,0.0675,0.8103,2024-2025,2025-2026
+external_multi_metric_global,assists_90,Asistencias,evaluación externa global,Ridge,205,0.0546,0.4867,2024-2025,2025-2026
+external_multi_metric_global,goals_90,Goles,evaluación externa global,Ridge,205,0.0658,0.7353,2024-2025,2025-2026
+external_multi_metric_global,xA_90,Asistencias esperadas,evaluación externa global,Ridge,205,0.0398,0.6918,2024-2025,2025-2026
+external_multi_metric_global,xG_90,Goles esperados,evaluación externa global,Ridge,205,0.0516,0.8403,2024-2025,2025-2026

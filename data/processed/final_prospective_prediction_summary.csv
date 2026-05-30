@@ -1,0 +1,5 @@
+metric_key,metric_label,model,players_evaluated,players_f_m_evaluated,prediction_mean,prediction_max,prediction_min,top_player,top_player_team,top_player_prediction,notes
+xG_90,Goles esperados,Ridge,309,175,0.1391,0.8354,-0.0511,Robert Lewandowski,Barcelona,0.8354011351574442,Predicción prospectiva no evaluada todavía con valor real futuro.
+goals_90,Goles,Ridge,309,175,0.1265,0.864,-0.0178,Robert Lewandowski,Barcelona,0.8640444099683454,Predicción prospectiva no evaluada todavía con valor real futuro.
+assists_90,Asistencias,Ridge,309,175,0.0986,0.369,-0.0164,Raphinha,Barcelona,0.3689633969640849,Predicción prospectiva no evaluada todavía con valor real futuro.
+xA_90,Asistencias esperadas,Ridge,309,175,0.107,0.3929,-0.015,Raphinha,Barcelona,0.392872556158734,Predicción prospectiva no evaluada todavía con valor real futuro.

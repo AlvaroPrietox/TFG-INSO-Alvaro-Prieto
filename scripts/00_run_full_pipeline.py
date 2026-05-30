@@ -1,7 +1,6 @@
 import argparse
 import subprocess
 import sys
-import time
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -9,17 +8,21 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS_DIR = PROJECT_ROOT / "scripts"
-DATA_RAW_DIR = PROJECT_ROOT / "data" / "raw"
 REPORTS_DIR = PROJECT_ROOT / "reports"
+DATA_DIR = PROJECT_ROOT / "data"
+RAW_DATA_DIR = DATA_DIR / "raw"
+PROCESSED_DATA_DIR = DATA_DIR / "processed"
+MODELS_DIR = PROJECT_ROOT / "models"
+TESTS_DIR = PROJECT_ROOT / "tests"
 
 LOG_OUTPUT_PATH = REPORTS_DIR / "00_pipeline_execution_log.md"
 
 
-REQUIRED_RAW_FILES = [
-    DATA_RAW_DIR / "matches_dataset.csv",
-    DATA_RAW_DIR / "all_players_normalized.csv",
-    DATA_RAW_DIR / "players_laliga.csv",
-    DATA_RAW_DIR / "laliga_players_2526.csv",
+REQUIRED_INPUT_FILES = [
+    RAW_DATA_DIR / "matches_dataset.csv",
+    RAW_DATA_DIR / "all_players_normalized.csv",
+    RAW_DATA_DIR / "players_laliga.csv",
+    RAW_DATA_DIR / "laliga_players_2526.csv",
 ]
 
 
@@ -28,467 +31,638 @@ class PipelineStep:
     """
     Representa un paso ejecutable del pipeline.
     """
-    step_id: str
     stage: str
+    script: str
     description: str
-    command: list[str]
-
-
-def python_script(script_name: str) -> list[str]:
-    """
-    Construye el comando para ejecutar un script Python usando el intérprete
-    activo, normalmente el del entorno virtual.
-    """
-    return [
-        sys.executable,
-        str(SCRIPTS_DIR / script_name),
-    ]
 
 
 PIPELINE_STEPS = [
     PipelineStep(
-        step_id="01",
         stage="diagnostics",
-        description="Diagnóstico inicial de datasets",
-        command=python_script("01_data_diagnostics.py"),
+        script="01_data_diagnostics.py",
+        description="Diagnóstico inicial de los datasets raw.",
     ),
     PipelineStep(
-        step_id="02",
         stage="preprocessing",
-        description="Preprocesamiento de partidos",
-        command=python_script("02_preprocess_matches.py"),
+        script="02_preprocess_matches.py",
+        description="Limpieza del dataset histórico de partidos.",
     ),
     PipelineStep(
-        step_id="03",
         stage="preprocessing",
-        description="Preprocesamiento de jugadores",
-        command=python_script("03_preprocess_players.py"),
+        script="03_preprocess_players.py",
+        description="Limpieza de datasets históricos y actuales de jugadores.",
     ),
     PipelineStep(
-        step_id="04",
+        stage="preprocessing",
+        script="13_prepare_2025_2026_laliga_target.py",
+        description="Preparación del target real 2025-2026 de LaLiga.",
+    ),
+    PipelineStep(
         stage="baseline",
-        description="Construcción del dataset descriptivo inicial",
-        command=python_script("04_build_player_modeling_dataset.py"),
+        script="04_build_player_modeling_dataset.py",
+        description="Construcción del dataset descriptivo inicial de modelado.",
     ),
     PipelineStep(
-        step_id="05",
         stage="baseline",
-        description="Entrenamiento del baseline descriptivo",
-        command=python_script("05_train_player_baseline.py"),
+        script="05_train_player_baseline.py",
+        description="Entrenamiento del baseline descriptivo inicial.",
     ),
     PipelineStep(
-        step_id="06",
         stage="baseline",
-        description="Análisis del baseline descriptivo",
-        command=python_script("06_analyze_player_baseline.py"),
+        script="06_analyze_player_baseline.py",
+        description="Análisis de importancia de variables del baseline.",
     ),
     PipelineStep(
-        step_id="07",
         stage="temporal_dataset",
-        description="Construcción del dataset temporal",
-        command=python_script("07_build_player_temporal_dataset.py"),
+        script="07_build_player_temporal_dataset.py",
+        description="Construcción del dataset temporal jugador-temporada.",
     ),
     PipelineStep(
-        step_id="08",
         stage="temporal_model",
-        description="Entrenamiento y evaluación temporal inicial",
-        command=python_script("08_train_player_temporal_model.py"),
+        script="08_train_player_temporal_model.py",
+        description="Entrenamiento y evaluación temporal inicial.",
     ),
     PipelineStep(
-        step_id="09",
         stage="temporal_model",
-        description="Generación de predicciones temporales de ejemplo",
-        command=python_script("09_generate_player_predictions.py"),
+        script="09_generate_player_predictions.py",
+        description="Generación de predicciones temporales de ejemplo.",
     ),
     PipelineStep(
-        step_id="10",
         stage="temporal_model",
-        description="Análisis de predicciones temporales de ejemplo",
-        command=python_script("10_analyze_player_predictions.py"),
+        script="10_analyze_player_predictions.py",
+        description="Análisis cualitativo de predicciones individuales.",
     ),
     PipelineStep(
-        step_id="11",
         stage="random_forest_legacy",
-        description="Entrenamiento y guardado del modelo Random Forest inicial",
-        command=python_script("11_train_and_save_temporal_model.py"),
+        script="11_train_and_save_temporal_model.py",
+        description="Entrenamiento y guardado del modelo Random Forest legacy.",
     ),
     PipelineStep(
-        step_id="12",
         stage="random_forest_legacy",
-        description="Predicciones actuales iniciales con Random Forest",
-        command=python_script("12_predict_laliga_current_players.py"),
+        script="12_predict_laliga_current_players.py",
+        description="Predicciones prospectivas legacy con Random Forest.",
     ),
     PipelineStep(
-        step_id="13",
-        stage="external_evaluation",
-        description="Preparación del target externo LaLiga 2025-2026",
-        command=python_script("13_prepare_2025_2026_laliga_target.py"),
+        stage="random_forest_legacy",
+        script="14_evaluate_laliga_2025_2026_predictions.py",
+        description="Evaluación externa legacy 2025-2026 con Random Forest.",
     ),
     PipelineStep(
-        step_id="14",
-        stage="external_evaluation",
-        description="Evaluación externa inicial 2025-2026",
-        command=python_script("14_evaluate_laliga_2025_2026_predictions.py"),
+        stage="random_forest_legacy",
+        script="15_analyze_laliga_2025_2026_f_m.py",
+        description="Evaluación externa legacy restringida a F/M.",
     ),
     PipelineStep(
-        step_id="15",
-        stage="external_evaluation",
-        description="Análisis externo F/M 2025-2026",
-        command=python_script("15_analyze_laliga_2025_2026_f_m.py"),
+        stage="random_forest_legacy",
+        script="16_build_experiment_summary.py",
+        description="Resumen experimental legacy previo a la selección final.",
     ),
     PipelineStep(
-        step_id="16",
-        stage="summaries",
-        description="Construcción del resumen inicial de experimentos",
-        command=python_script("16_build_experiment_summary.py"),
+        stage="random_forest_legacy",
+        script="17_generate_result_figures.py",
+        description="Generación de figuras legacy de resultados.",
     ),
     PipelineStep(
-        step_id="17",
-        stage="summaries",
-        description="Generación de figuras iniciales de resultados",
-        command=python_script("17_generate_result_figures.py"),
-    ),
-    PipelineStep(
-        step_id="18",
         stage="error_analysis",
-        description="Análisis de error por rangos de xG_90",
-        command=python_script("18_analyze_error_by_xg_range.py"),
+        script="18_analyze_error_by_xg_range.py",
+        description="Análisis del error por rangos de xG_90 real.",
     ),
     PipelineStep(
-        step_id="19",
         stage="model_comparison",
-        description="Comparación temporal interna de modelos",
-        command=python_script("19_compare_temporal_models.py"),
+        script="19_compare_temporal_models.py",
+        description="Comparación temporal interna de modelos candidatos.",
     ),
     PipelineStep(
-        step_id="20",
         stage="model_comparison",
-        description="Comparación externa 2025-2026 de modelos",
-        command=python_script("20_compare_external_2025_2026_models.py"),
+        script="20_compare_external_2025_2026_models.py",
+        description=(
+            "Comparación externa de modelos para xG_90 y evaluación "
+            "multi-métrica con Ridge."
+        ),
     ),
     PipelineStep(
-        step_id="21",
         stage="final_model",
-        description="Entrenamiento y guardado del modelo final Ridge",
-        command=python_script("21_train_and_save_final_ridge_model.py"),
+        script="21_train_and_save_final_ridge_model.py",
+        description="Entrenamiento y guardado de modelos Ridge finales multi-métrica.",
     ),
     PipelineStep(
-        step_id="22",
         stage="final_model",
-        description="Predicciones actuales con el modelo final Ridge",
-        command=python_script("22_predict_laliga_current_players_final_model.py"),
+        script="22_predict_laliga_current_players_final_model.py",
+        description="Predicciones prospectivas multi-métrica con Ridge.",
     ),
     PipelineStep(
-        step_id="23",
         stage="final_model",
-        description="Construcción del resumen final de experimentos",
-        command=python_script("23_build_final_experiment_summary.py"),
+        script="23_build_final_experiment_summary.py",
+        description="Resumen final de experimentos multi-métrica.",
     ),
 ]
 
 
-TEST_STEP = PipelineStep(
-    step_id="tests",
-    stage="tests",
-    description="Ejecución de pruebas unitarias",
-    command=[sys.executable, "-m", "pytest"],
-)
+STAGE_ORDER = [
+    "diagnostics",
+    "preprocessing",
+    "baseline",
+    "temporal_dataset",
+    "temporal_model",
+    "random_forest_legacy",
+    "error_analysis",
+    "model_comparison",
+    "final_model",
+    "tests",
+]
 
 
-def get_available_stages() -> list[str]:
+STAGE_DESCRIPTIONS = {
+    "all": "Ejecuta el pipeline completo.",
+    "diagnostics": "Diagnóstico inicial de datos raw.",
+    "preprocessing": "Limpieza de datos y preparación del target 2025-2026.",
+    "baseline": "Baseline descriptivo inicial de jugadores.",
+    "temporal_dataset": "Construcción del dataset temporal jugador-temporada.",
+    "temporal_model": "Evaluación temporal inicial y análisis de predicciones.",
+    "random_forest_legacy": "Experimentos legacy con Random Forest.",
+    "error_analysis": "Análisis del error por rangos de xG_90.",
+    "model_comparison": "Comparación de modelos y evaluación externa multi-métrica.",
+    "final_model": "Entrenamiento, predicción y resumen final multi-métrica con Ridge.",
+    "tests": "Ejecución de tests automatizados con pytest.",
+}
+
+
+EXPECTED_OUTPUTS_BY_STAGE = {
+    "diagnostics": [
+        REPORTS_DIR / "01_data_diagnostics.md",
+    ],
+    "preprocessing": [
+        PROCESSED_DATA_DIR / "matches_clean.csv",
+        PROCESSED_DATA_DIR / "historical_players_clean.csv",
+        PROCESSED_DATA_DIR / "laliga_players_all_clean.csv",
+        PROCESSED_DATA_DIR / "laliga_players_latest_clean.csv",
+        PROCESSED_DATA_DIR / "laliga_2025_2026_target_clean.csv",
+    ],
+    "baseline": [
+        PROCESSED_DATA_DIR / "player_modeling_dataset.csv",
+        PROCESSED_DATA_DIR / "player_baseline_evaluation.csv",
+        PROCESSED_DATA_DIR / "player_feature_importance.csv",
+        REPORTS_DIR / "06_player_baseline_analysis.md",
+    ],
+    "temporal_dataset": [
+        PROCESSED_DATA_DIR / "player_temporal_modeling_dataset.csv",
+    ],
+    "temporal_model": [
+        PROCESSED_DATA_DIR / "player_temporal_evaluation.csv",
+        PROCESSED_DATA_DIR / "player_temporal_feature_importance.csv",
+        PROCESSED_DATA_DIR / "player_temporal_predictions_without_previous_xg.csv",
+        PROCESSED_DATA_DIR / "player_temporal_predictions_f_m_sample_15.csv",
+        REPORTS_DIR / "08_player_temporal_model_report.md",
+        REPORTS_DIR / "10_player_prediction_examples.md",
+    ],
+    "random_forest_legacy": [
+        MODELS_DIR / "random_forest_temporal_without_previous_xg.joblib",
+        MODELS_DIR / "random_forest_temporal_without_previous_xg_metadata.json",
+        PROCESSED_DATA_DIR / "laliga_current_player_predictions.csv",
+        PROCESSED_DATA_DIR / "laliga_current_top_25_f_m_predictions.csv",
+        PROCESSED_DATA_DIR / "laliga_2025_2026_prediction_evaluation.csv",
+        PROCESSED_DATA_DIR / "laliga_2025_2026_prediction_evaluation_f_m.csv",
+        PROCESSED_DATA_DIR / "experiment_summary.csv",
+        REPORTS_DIR / "14_laliga_2025_2026_prediction_evaluation.md",
+        REPORTS_DIR / "15_laliga_2025_2026_prediction_evaluation_f_m.md",
+        REPORTS_DIR / "16_experiment_summary.md",
+        REPORTS_DIR / "17_result_figures_index.md",
+    ],
+    "error_analysis": [
+        PROCESSED_DATA_DIR / "error_by_xg_range.csv",
+        REPORTS_DIR / "18_error_by_xg_range.md",
+        FIGURES_DIR / "error_by_xg_range.png",
+    ],
+    "model_comparison": [
+        PROCESSED_DATA_DIR / "temporal_model_comparison.csv",
+        PROCESSED_DATA_DIR / "temporal_model_comparison_by_xg_range.csv",
+        PROCESSED_DATA_DIR / "external_2025_2026_model_comparison.csv",
+        PROCESSED_DATA_DIR / "external_2025_2026_model_comparison_f_m.csv",
+        PROCESSED_DATA_DIR / "external_2025_2026_model_predictions.csv",
+        PROCESSED_DATA_DIR / "external_2025_2026_model_comparison_by_xg_range.csv",
+        PROCESSED_DATA_DIR / "external_2025_2026_multi_metric_predictions.csv",
+        PROCESSED_DATA_DIR / "external_2025_2026_multi_metric_predictions_long.csv",
+        PROCESSED_DATA_DIR / "external_2025_2026_multi_metric_comparison.csv",
+        PROCESSED_DATA_DIR / "external_2025_2026_multi_metric_comparison_f_m.csv",
+        REPORTS_DIR / "19_temporal_model_comparison.md",
+        REPORTS_DIR / "20_external_2025_2026_model_comparison.md",
+        FIGURES_DIR / "external_2025_2026_multi_metric_mae.png",
+        FIGURES_DIR / "external_2025_2026_multi_metric_r2.png",
+    ],
+    "final_model": [
+        MODELS_DIR / "ridge_temporal_xG_90.joblib",
+        MODELS_DIR / "ridge_temporal_goals_90.joblib",
+        MODELS_DIR / "ridge_temporal_assists_90.joblib",
+        MODELS_DIR / "ridge_temporal_xA_90.joblib",
+        MODELS_DIR / "ridge_temporal_multi_metric_metadata.json",
+        MODELS_DIR / "ridge_temporal_without_previous_xg.joblib",
+        MODELS_DIR / "ridge_temporal_without_previous_xg_metadata.json",
+        PROCESSED_DATA_DIR / "laliga_current_player_predictions_final_ridge.csv",
+        PROCESSED_DATA_DIR / "laliga_current_player_predictions_final_ridge_long.csv",
+        PROCESSED_DATA_DIR / "laliga_current_top_25_f_m_predictions_final_ridge.csv",
+        PROCESSED_DATA_DIR / "laliga_current_top_25_f_m_predictions_by_metric_final_ridge.csv",
+        PROCESSED_DATA_DIR / "final_experiment_summary.csv",
+        PROCESSED_DATA_DIR / "final_multi_metric_summary.csv",
+        PROCESSED_DATA_DIR / "final_prospective_prediction_summary.csv",
+        REPORTS_DIR / "22_laliga_current_predictions_final_model.md",
+        REPORTS_DIR / "23_final_experiment_summary.md",
+        FIGURES_DIR / "laliga_current_top_25_final_ridge_xG_90.png",
+        FIGURES_DIR / "laliga_current_top_25_final_ridge_goals_90.png",
+        FIGURES_DIR / "laliga_current_top_25_final_ridge_assists_90.png",
+        FIGURES_DIR / "laliga_current_top_25_final_ridge_xA_90.png",
+    ],
+}
+
+
+# ---------------------------------------------------------------------------
+# Utilidades de consola y logging
+# ---------------------------------------------------------------------------
+
+
+def format_relative_path(path: Path) -> str:
     """
-    Devuelve las fases disponibles del pipeline en orden de aparición.
+    Devuelve una ruta relativa al proyecto cuando es posible.
     """
-    stages = []
-
-    for step in PIPELINE_STEPS:
-        if step.stage not in stages:
-            stages.append(step.stage)
-
-    stages.append("tests")
-
-    return stages
+    try:
+        return str(path.relative_to(PROJECT_ROOT))
+    except ValueError:
+        return str(path)
 
 
-def validate_required_raw_files() -> None:
+def initialize_log() -> None:
     """
-    Comprueba que los datasets originales necesarios existen en data/raw.
+    Inicializa el informe de ejecución del pipeline.
+    """
+    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+
+    lines = [
+        "# Log de ejecución del pipeline",
+        "",
+        f"- Fecha de ejecución: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+        f"- Directorio del proyecto: `{PROJECT_ROOT}`",
+        "",
+    ]
+
+    LOG_OUTPUT_PATH.write_text("\n".join(lines), encoding="utf-8")
+
+
+def append_log(lines: list[str]) -> None:
+    """
+    Añade líneas al informe de ejecución.
+    """
+    with LOG_OUTPUT_PATH.open("a", encoding="utf-8") as file:
+        file.write("\n" + "\n".join(lines) + "\n")
+
+
+def print_header(message: str) -> None:
+    """
+    Imprime un encabezado visible en consola.
+    """
+    separator = "=" * 80
+    print("\n" + separator)
+    print(message)
+    print(separator)
+
+
+def print_stage_list() -> None:
+    """
+    Muestra las fases disponibles.
+    """
+    print("Fases disponibles:\n")
+
+    for stage_name in ["all"] + STAGE_ORDER:
+        print(f"- {stage_name}: {STAGE_DESCRIPTIONS[stage_name]}")
+
+
+# ---------------------------------------------------------------------------
+# Validaciones
+# ---------------------------------------------------------------------------
+
+
+def check_required_inputs() -> None:
+    """
+    Comprueba que existen los archivos raw mínimos para ejecutar el pipeline.
     """
     missing_files = [
-        path for path in REQUIRED_RAW_FILES
+        path for path in REQUIRED_INPUT_FILES
         if not path.exists()
     ]
 
     if missing_files:
-        missing_text = "\n".join(
-            f"- {path}" for path in missing_files
+        formatted_missing_files = "\n".join(
+            f"- {format_relative_path(path)}"
+            for path in missing_files
         )
 
         raise FileNotFoundError(
-            "Faltan datasets originales necesarios en data/raw:\n"
-            f"{missing_text}"
+            "Faltan archivos de entrada requeridos:\n"
+            f"{formatted_missing_files}"
         )
 
+    print("Archivos de entrada requeridos encontrados.")
 
-def filter_steps_by_stage(
-    selected_stage: str,
-    include_tests: bool,
-) -> list[PipelineStep]:
+
+def check_stage_outputs(stage_name: str) -> list[Path]:
     """
-    Selecciona los pasos que se deben ejecutar según la fase solicitada.
+    Comprueba salidas esperadas de una fase concreta.
     """
-    if selected_stage == "all":
-        steps = list(PIPELINE_STEPS)
-    elif selected_stage == "tests":
-        steps = []
+    expected_outputs = EXPECTED_OUTPUTS_BY_STAGE.get(stage_name, [])
+
+    missing_outputs = [
+        path for path in expected_outputs
+        if not path.exists()
+    ]
+
+    if missing_outputs:
+        print("Aviso: faltan algunas salidas esperadas de la fase:")
+        for path in missing_outputs:
+            print(f"- {format_relative_path(path)}")
     else:
-        steps = [
-            step for step in PIPELINE_STEPS
-            if step.stage == selected_stage
+        if expected_outputs:
+            print("Salidas esperadas de la fase encontradas.")
+
+    return missing_outputs
+
+
+# ---------------------------------------------------------------------------
+# Ejecución
+# ---------------------------------------------------------------------------
+
+
+def get_steps_for_stage(stage_name: str) -> list[PipelineStep]:
+    """
+    Devuelve los pasos correspondientes a una fase.
+    """
+    if stage_name == "all":
+        return PIPELINE_STEPS
+
+    return [
+        step for step in PIPELINE_STEPS
+        if step.stage == stage_name
+    ]
+
+
+def run_command(command: list[str], description: str) -> subprocess.CompletedProcess:
+    """
+    Ejecuta un comando y registra salida estándar y errores.
+    """
+    command_as_text = " ".join(command)
+
+    print_header(description)
+    print(f"Comando: {command_as_text}")
+
+    append_log(
+        [
+            f"## {description}",
+            "",
+            f"```powershell\n{command_as_text}\n```",
+            "",
         ]
-
-    if include_tests:
-        if selected_stage in ["all", "tests"]:
-            steps.append(TEST_STEP)
-
-    return steps
-
-
-def run_command(step: PipelineStep) -> tuple[int, float, list[str]]:
-    """
-    Ejecuta un comando, muestra la salida por consola y devuelve:
-    - código de salida,
-    - duración,
-    - salida completa.
-    """
-    print("")
-    print("=" * 100)
-    print(f"Paso {step.step_id}: {step.description}")
-    print(f"Fase: {step.stage}")
-    print("=" * 100)
-    print("Comando:")
-    print(" ".join(step.command))
-    print("")
-
-    start_time = time.perf_counter()
-
-    process = subprocess.Popen(
-        step.command,
-        cwd=PROJECT_ROOT,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
     )
 
-    output_lines = []
+    result = subprocess.run(
+        command,
+        cwd=PROJECT_ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
 
-    if process.stdout is not None:
-        for line in process.stdout:
-            print(line, end="")
-            output_lines.append(line)
+    if result.stdout:
+        print(result.stdout)
+        append_log(
+            [
+                "### Salida estándar",
+                "",
+                f"```text\n{result.stdout.strip()}\n```",
+                "",
+            ]
+        )
 
-    return_code = process.wait()
+    if result.stderr:
+        print(result.stderr)
+        append_log(
+            [
+                "### Errores / advertencias",
+                "",
+                f"```text\n{result.stderr.strip()}\n```",
+                "",
+            ]
+        )
 
-    elapsed_seconds = time.perf_counter() - start_time
+    if result.returncode != 0:
+        append_log(
+            [
+                f"**Estado:** error con código `{result.returncode}`.",
+                "",
+            ]
+        )
+        raise RuntimeError(
+            f"El comando ha fallado con código {result.returncode}: "
+            f"{command_as_text}"
+        )
 
-    print("")
-    print(f"Duración: {elapsed_seconds:.2f} segundos")
+    append_log(["**Estado:** ejecutado correctamente.", ""])
 
-    if return_code == 0:
-        print(f"Resultado: OK")
-    else:
-        print(f"Resultado: ERROR | Código de salida: {return_code}")
-
-    return return_code, elapsed_seconds, output_lines
-
-
-def build_log_header(
-    selected_stage: str,
-    include_tests: bool,
-) -> list[str]:
-    """
-    Construye la cabecera del log de ejecución.
-    """
-    lines = []
-
-    lines.append("# Log de ejecución del pipeline")
-    lines.append("")
-    lines.append(f"- Fecha de ejecución: {datetime.now().isoformat(timespec='seconds')}")
-    lines.append(f"- Python: {sys.version}")
-    lines.append(f"- Intérprete: `{sys.executable}`")
-    lines.append(f"- Proyecto: `{PROJECT_ROOT}`")
-    lines.append(f"- Fase seleccionada: `{selected_stage}`")
-    lines.append(f"- Tests incluidos: `{include_tests}`")
-    lines.append("")
-
-    return lines
+    return result
 
 
-def append_step_log(
-    log_lines: list[str],
-    step: PipelineStep,
-    return_code: int,
-    elapsed_seconds: float,
-    output_lines: list[str],
+def run_pipeline_steps(
+    steps: list[PipelineStep],
+    validate_outputs: bool,
 ) -> None:
     """
-    Añade al log la información de un paso ejecutado.
+    Ejecuta una lista de pasos del pipeline.
     """
-    status = "OK" if return_code == 0 else "ERROR"
+    current_stage = None
 
-    log_lines.append(f"## Paso {step.step_id}: {step.description}")
-    log_lines.append("")
-    log_lines.append(f"- Fase: `{step.stage}`")
-    log_lines.append(f"- Estado: `{status}`")
-    log_lines.append(f"- Código de salida: `{return_code}`")
-    log_lines.append(f"- Duración: `{elapsed_seconds:.2f}` segundos")
-    log_lines.append("")
-    log_lines.append("### Comando")
-    log_lines.append("")
-    log_lines.append("```text")
-    log_lines.append(" ".join(step.command))
-    log_lines.append("```")
-    log_lines.append("")
-    log_lines.append("### Salida")
-    log_lines.append("")
-    log_lines.append("```text")
-    log_lines.extend(line.rstrip("\n") for line in output_lines)
-    log_lines.append("```")
-    log_lines.append("")
+    for step in steps:
+        if step.stage != current_stage:
+            current_stage = step.stage
+            print_header(f"Fase: {current_stage}")
+            append_log([f"# Fase: {current_stage}", ""])
+
+        script_path = SCRIPTS_DIR / step.script
+
+        if not script_path.exists():
+            raise FileNotFoundError(
+                f"No se ha encontrado el script: {script_path}"
+            )
+
+        command = [
+            sys.executable,
+            str(script_path),
+        ]
+
+        run_command(
+            command=command,
+            description=step.description,
+        )
+
+    if validate_outputs:
+        completed_stages = sorted(
+            {step.stage for step in steps},
+            key=lambda stage: STAGE_ORDER.index(stage),
+        )
+
+        for stage_name in completed_stages:
+            missing_outputs = check_stage_outputs(stage_name)
+
+            if missing_outputs:
+                append_log(
+                    [
+                        f"## Aviso de salidas faltantes en `{stage_name}`",
+                        "",
+                        *[
+                            f"- `{format_relative_path(path)}`"
+                            for path in missing_outputs
+                        ],
+                        "",
+                    ]
+                )
 
 
-def write_log(log_lines: list[str]) -> None:
+def run_tests() -> None:
     """
-    Escribe el log en reports/00_pipeline_execution_log.md.
+    Ejecuta la suite de tests con pytest.
     """
-    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+    if not TESTS_DIR.exists():
+        print("No se ha encontrado el directorio tests/. Se omite la fase de tests.")
+        append_log(["# Fase: tests", "", "No existe `tests/`. Fase omitida.", ""])
+        return
 
-    LOG_OUTPUT_PATH.write_text(
-        "\n".join(log_lines),
-        encoding="utf-8",
+    print_header("Fase: tests")
+    append_log(["# Fase: tests", ""])
+
+    command = [
+        sys.executable,
+        "-m",
+        "pytest",
+        str(TESTS_DIR),
+    ]
+
+    run_command(
+        command=command,
+        description="Ejecución de tests automatizados con pytest.",
     )
 
 
-def print_available_stages() -> None:
+# ---------------------------------------------------------------------------
+# Argumentos CLI
+# ---------------------------------------------------------------------------
+
+
+def build_argument_parser() -> argparse.ArgumentParser:
     """
-    Muestra por consola las fases disponibles.
-    """
-    print("Fases disponibles:")
-    print("")
-
-    print("- all")
-
-    for stage in get_available_stages():
-        print(f"- {stage}")
-
-
-def parse_arguments() -> argparse.Namespace:
-    """
-    Define y procesa argumentos de línea de comandos.
+    Construye el parser de argumentos de línea de comandos.
     """
     parser = argparse.ArgumentParser(
         description=(
-            "Ejecuta el pipeline completo o una fase concreta del sistema "
-            "de predicción de rendimiento ofensivo."
+            "Ejecuta el pipeline completo o una fase específica del TFG de "
+            "predicción de rendimiento ofensivo de jugadores."
         )
     )
 
     parser.add_argument(
         "--stage",
+        choices=["all"] + STAGE_ORDER,
         default="all",
-        choices=["all"] + get_available_stages(),
         help="Fase del pipeline que se desea ejecutar.",
     )
 
     parser.add_argument(
         "--skip-tests",
         action="store_true",
-        help="No ejecuta pytest al final del pipeline completo.",
+        help="Omite la ejecución de tests cuando se ejecuta el pipeline completo.",
     )
 
     parser.add_argument(
         "--skip-input-check",
         action="store_true",
-        help="Omite la comprobación inicial de datasets en data/raw.",
+        help="Omite la comprobación inicial de archivos raw requeridos.",
+    )
+
+    parser.add_argument(
+        "--skip-output-check",
+        action="store_true",
+        help="Omite la comprobación de salidas esperadas por fase.",
     )
 
     parser.add_argument(
         "--list-stages",
         action="store_true",
-        help="Muestra las fases disponibles y termina.",
+        help="Lista las fases disponibles y termina la ejecución.",
     )
 
-    return parser.parse_args()
+    return parser
 
 
 def main() -> None:
-    args = parse_arguments()
+    parser = build_argument_parser()
+    args = parser.parse_args()
 
     if args.list_stages:
-        print_available_stages()
+        print_stage_list()
         return
 
-    include_tests = not args.skip_tests
+    initialize_log()
 
-    if args.stage not in ["all", "tests"]:
-        include_tests = False
+    print_header("Inicio del pipeline")
+    print(f"Proyecto: {PROJECT_ROOT}")
+    print(f"Fase solicitada: {args.stage}")
+    print(f"Log: {LOG_OUTPUT_PATH}")
 
-    if not args.skip_input_check and args.stage == "all":
-        validate_required_raw_files()
-
-    steps_to_run = filter_steps_by_stage(
-        selected_stage=args.stage,
-        include_tests=include_tests,
+    append_log(
+        [
+            "## Configuración de ejecución",
+            "",
+            f"- Fase solicitada: `{args.stage}`",
+            f"- Omitir tests: `{args.skip_tests}`",
+            f"- Omitir comprobación de inputs: `{args.skip_input_check}`",
+            f"- Omitir comprobación de outputs: `{args.skip_output_check}`",
+            "",
+        ]
     )
 
-    if not steps_to_run:
-        print("No hay pasos para ejecutar con la configuración indicada.")
-        return
+    if not args.skip_input_check:
+        check_required_inputs()
 
-    log_lines = build_log_header(
-        selected_stage=args.stage,
-        include_tests=include_tests,
-    )
+    validate_outputs = not args.skip_output_check
 
-    total_start_time = time.perf_counter()
-
-    for step in steps_to_run:
-        return_code, elapsed_seconds, output_lines = run_command(step)
-
-        append_step_log(
-            log_lines=log_lines,
-            step=step,
-            return_code=return_code,
-            elapsed_seconds=elapsed_seconds,
-            output_lines=output_lines,
+    if args.stage == "tests":
+        run_tests()
+    elif args.stage == "all":
+        run_pipeline_steps(
+            steps=PIPELINE_STEPS,
+            validate_outputs=validate_outputs,
         )
 
-        write_log(log_lines)
+        if not args.skip_tests:
+            run_tests()
+    else:
+        selected_steps = get_steps_for_stage(args.stage)
 
-        if return_code != 0:
-            print("")
-            print("Ejecución detenida porque un paso ha fallado.")
-            print(f"Revisa el log en: {LOG_OUTPUT_PATH}")
-            sys.exit(return_code)
+        if not selected_steps:
+            raise ValueError(
+                f"La fase `{args.stage}` no contiene pasos ejecutables."
+            )
 
-    total_elapsed_seconds = time.perf_counter() - total_start_time
+        run_pipeline_steps(
+            steps=selected_steps,
+            validate_outputs=validate_outputs,
+        )
 
-    log_lines.append("## Resumen final")
-    log_lines.append("")
-    log_lines.append("- Estado global: `OK`")
-    log_lines.append(f"- Duración total: `{total_elapsed_seconds:.2f}` segundos")
-    log_lines.append("")
+    append_log(
+        [
+            "# Ejecución completada",
+            "",
+            f"Finalización: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+            "",
+        ]
+    )
 
-    write_log(log_lines)
-
-    print("")
-    print("=" * 100)
-    print("Pipeline ejecutado correctamente.")
-    print(f"Duración total: {total_elapsed_seconds:.2f} segundos")
+    print_header("Pipeline finalizado correctamente")
     print(f"Log generado en: {LOG_OUTPUT_PATH}")
-    print("=" * 100)
 
 
 if __name__ == "__main__":

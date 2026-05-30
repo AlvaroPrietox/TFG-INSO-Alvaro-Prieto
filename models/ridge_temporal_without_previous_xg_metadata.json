@@ -38,6 +38,6 @@
     ],
     "sklearn_version": "1.8.0",
     "model_file": "ridge_temporal_without_previous_xg.joblib",
-    "selection_reason": "Ridge se selecciona como modelo final porque obtuvo el mejor rendimiento en la comparación externa 2025-2026, con menor MAE y mayor R² que RandomForestRegressor en el conjunto global y en el subconjunto F/M.",
-    "notes": "Modelo temporal entrenado para predecir xG_90 de la temporada siguiente sin utilizar xG_90 ni npxG_90 de la temporada anterior como predictores directos."
+    "selection_reason": "Ridge se selecciona como modelo final para xG_90 porque obtuvo el mejor rendimiento en la comparación externa 2025-2026, con menor MAE y mayor R² que RandomForestRegressor en el conjunto global y en el subconjunto F/M.",
+    "notes": "Archivo mantenido por compatibilidad con la versión previa del proyecto. El modelo equivalente también se guarda como ridge_temporal_xG_90.joblib dentro de la versión multi-métrica."
 }
